@@ -3,7 +3,7 @@
  * @param {string} url URL to fetch
  * @param {RequestInit} options Request options 
  */
-const authedFetch = (url, options = {}) => {
+export const authedFetch = (url, options = {}) => {
   if (!options.headers)
     options.headers = {}
   options.headers["Authorization"] = `Bearer ${localStorage.getItem("access_token")}`

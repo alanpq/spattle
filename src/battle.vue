@@ -18,7 +18,11 @@
       <p>Not seeing songs you like? You can:</p>
       <button @click="addPlaylists()">Add all songs from my playlists</button>
       <p>or search a song/album to add:</p>
-      <input type="text" placeholder="Song/Album name" />
+      <input
+        @keydown="keyDown($event)"
+        type="text"
+        placeholder="Song/Album name"
+      />
     </article>
   </main>
 </template>
@@ -26,16 +30,29 @@
 <script>
 import * as spotify from "./spotify";
 
+const addTrack = async (id) => {
+  console.log("adding track id " + id);
+  console.log(
+    await (
+      await fetch("http://localhost:3000/api/addtrack/" + id, {
+        method: "POST",
+      })
+    ).text()
+  );
+};
+
 export default {
   name: "battle",
   data() {
-    return {
-      msg: "Welcome to Your Vue.js App",
-    };
+    return {};
   },
   methods: {
     addPlaylists: async () => {
       console.log(await spotify.getPlaylists());
+    },
+    keyDown: (e) => {
+      if (e.keyCode != 13) return;
+      addTrack(e.target.value);
     },
   },
 };
