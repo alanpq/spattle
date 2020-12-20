@@ -9,7 +9,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 
-const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]//, "_", ".", "-", "~"]
+const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", ".", "-", "~"]
 for (const x of Array(26).keys()) {
   chars.push(String.fromCharCode('a'.charCodeAt(0) + x))
   chars.push(String.fromCharCode('A'.charCodeAt(0) + x))
