@@ -14,10 +14,12 @@
         src="https://i.scdn.co/image/ab67616d0000b273869f7cf031b24df4dbb1f778"
       />
     </article>
-    <p>Not seeing songs you like? You can search a song/album to add:</p>
-    <input type="text" placeholder="Song/Album name" />
-    <p>or</p>
-    <button>Add all songs from my playlists</button>
+    <article>
+      <p>Not seeing songs you like? You can:</p>
+      <button @click="addPlaylists()">Add all songs from my playlists</button>
+      <p>or search a song/album to add:</p>
+      <input type="text" placeholder="Song/Album name" />
+    </article>
   </main>
 </template>
 
@@ -35,9 +37,15 @@ export default {
 
 <style lang="scss">
 main#battle {
+  padding-top: 20px;
+
   h1 {
     text-align: center;
   }
+  article {
+    padding: 0 50px;
+  }
+
   .versus {
     display: grid;
     grid-template-columns: 2fr 1fr 2fr;
