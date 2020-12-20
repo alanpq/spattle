@@ -1,0 +1,30 @@
+{
+  "name": "spotify-battle",
+  "version": "1.0.0",
+  "description": "Spotify battle site",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p ./ --outDir build/",
+    "start": "node build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oofsauce/spotify-battle.git"
+  },
+  "author": "oofsauce",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oofsauce/spotify-battle/issues"
+  },
+  "homepage": "https://github.com/oofsauce/spotify-battle#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/node": "^14.14.14",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pug": "^3.0.0"
+  }
+}
