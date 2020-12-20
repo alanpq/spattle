@@ -24,12 +24,19 @@
 </template>
 
 <script>
+import * as spotify from "./spotify";
+
 export default {
   name: "battle",
   data() {
     return {
       msg: "Welcome to Your Vue.js App",
     };
+  },
+  methods: {
+    addPlaylists: async () => {
+      console.log(await spotify.getPlaylists());
+    },
   },
 };
 </script>
