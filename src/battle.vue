@@ -14,6 +14,10 @@
         src="https://i.scdn.co/image/ab67616d0000b273869f7cf031b24df4dbb1f778"
       />
     </article>
+    <p>Not seeing songs you like? You can search a song/album to add:</p>
+    <input type="text" placeholder="Song/Album name" />
+    <p>or</p>
+    <button>Add all songs from my playlists</button>
   </main>
 </template>
 
