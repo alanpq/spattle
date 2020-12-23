@@ -65,12 +65,13 @@ const genChallenge = () => {
 
 let db: Db;
 let coll: Collection;
+let historyCol: Collection;
 
 client.connect().then(() => {
   db = client.db('spattle');
   coll = db.collection('trackRatings');
+  historyCol = db.collection('battleHistory');
 })
-
 
 app.use(json())
 
@@ -139,6 +140,20 @@ app.post('/api/battle/win/:token', async (req, res) => {
   })
   console.log(`updating song '${battle.a}' to rating ${nA}`)
   console.log(`updating song '${battle.b}' to rating ${nB}`)
+
+  historyCol.insertOne({
+    token: tok,
+    a: {
+      id: battle.a,
+      old: a.rating,
+      new: nA
+    },
+    b: {
+      id: battle.b,
+      old: b.rating,
+      new: nB
+    },
+  })
 
   delete battles[tok];
 
