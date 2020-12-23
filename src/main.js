@@ -6,6 +6,7 @@ import Index from './index.vue'
 import Battle from './battle.vue'
 
 import "regenerator-runtime"
+import * as spotify from './spotify'
 
 const routes = {
   '/': Index,

@@ -106,13 +106,43 @@ app.get('/api/battle', async (req, res) => {
 
 app.post('/api/battle/win/:token', async (req, res) => {
   console.log(req.params.token)
+  console.log(req.query.winner)
+
+  if (!req.query.winner || !(req.query.winner == "0" || req.query.winner == "1"))
+    return res.status(400).json({ code: 400, message: "No winner provided!" });
+
   if (!req.params.token) return res.status(400).json({ code: 400, message: "No battle token provided!" });
   const tok: string = req.params.token as string;
   if (!battles[tok]) return res.status(404).json({ code: 401, message: "Invalid battle!" })
+  const battle = battles[tok];
+  const a: any = await coll.findOne({ id: battle.a });
+  const b: any = await coll.findOne({ id: battle.b });
+  const qa = Math.pow(10, a.rating / 400);
+  const qb = Math.pow(10, b.rating / 400);
+  const qsum = qa + qb;
+  const ea = qa / (qsum);
+  const eb = qb / (qsum);
+  const aScore = (req.query.winner == "0") ? 1 : 0;
+  const bScore = (req.query.winner == "1") ? 1 : 0;
+  const nA = a.rating + kFactor * (aScore - ea);
+  const nB = b.rating + kFactor * (bScore - eb);
+  coll.updateOne({ id: battle.a }, {
+    "$set": { rating: nA },
+    "$inc": { battles: 1 },
+  })
+  coll.updateOne({ id: battle.b }, {
+    "$set": { rating: nB },
+    "$inc": { battles: 1 },
+  })
+  console.log(`updating song '${battle.a}' to rating ${nA}`)
+  console.log(`updating song '${battle.b}' to rating ${nB}`)
+
+  delete battles[tok]; // TODO: delete battles after timeout
+
+  // TODO: match history (for reverting bad battles)
 
   res.status(200).json({
     code: 200,
-    token: 'asdasd'
   })
 })
 

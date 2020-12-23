@@ -1,6 +1,6 @@
 <template>
   <main id="battle">
-    <h1>Which song is better? {{ battle.token }}</h1>
+    <h1>Which song is better?</h1>
     <article class="versus">
       <h3 class="song-a">{{ battle.a.name }}</h3>
       <section class="song-a">
@@ -9,6 +9,7 @@
           <PlaySVG />
         </button>
       </section>
+      <button class="song-a winner" @click="win(0)">Winner!</button>
       <span>VERSUS</span>
       <h3 class="song-b">{{ battle.b.name }}</h3>
       <section class="song-b">
@@ -17,7 +18,6 @@
           <PlaySVG />
         </button>
       </section>
-      <button class="song-a winner" @click="win(0)">Winner!</button>
       <button class="song-b winner" @click="win(1)">Winner!</button>
     </article>
     <article class="controls">
@@ -29,8 +29,11 @@
         <PlaySVG v-else />
       </button>
       <section class="track"><span></span></section>
-      <div class="devices" @click="toggleDevicesMenu($event)">
-        <ul :class="{ open: devicesOpen }">
+      <div
+        :class="{ devices: true, open: devicesOpen }"
+        @click="toggleDevicesMenu($event)"
+      >
+        <ul>
           <li
             v-for="device in devices"
             v-bind:key="device.id"
@@ -41,8 +44,8 @@
         </ul>
       </div>
     </article>
-    <button @click="newBattle()">New Battle</button>
-    <article>
+    <!-- <button @click="newBattle()">New Battle</button> -->
+    <article class="text">
       <p>Not seeing songs you like? You can:</p>
       <section class="playlist-add">
         <button @click="addPlaylists()">Add all songs from my playlists</button>
@@ -52,12 +55,14 @@
           songs!
         </span>
       </section>
-      <p>or search a song/album to add:</p>
+      <p>or search a song/album to add (not working):</p>
       <input
         @keydown="keyDown($event)"
         type="text"
         placeholder="Song/Album name"
+        disabled
       />
+      test
     </article>
   </main>
 </template>
@@ -66,6 +71,7 @@
 import PlaySVG from "./assets/PlaySVG";
 import PauseSVG from "./assets/PauseSVG";
 
+import * as track from "./track";
 import * as spotify from "./spotify";
 const addTrack = async (id) => {
   console.log("adding track id " + id);
@@ -125,16 +131,18 @@ export default {
       battle: {
         token: "",
         a: {
+          name: "Test Song TITLE 1",
           img:
             "https://i.scdn.co/image/ab67616d0000b273869f7cf031b24df4dbb1f778",
         },
         b: {
+          name: "Test Song TITLE 2",
           img:
             "https://i.scdn.co/image/ab67616d0000b273869f7cf031b24df4dbb1f778",
         },
       },
       devicesOpen: false,
-      devices: [],
+      devices: [{ name: "Test Device 1" }, { name: "Test Device 2" }],
       player: playbackState,
       stateUpdateInt: "",
       lastUpdateAt: 0,
@@ -145,6 +153,18 @@ export default {
     dom.playlistAddMsg = document.querySelector(".playlist-add span");
     dom.track = document.querySelector(".controls .track");
     dom.trackDot = dom.track.children[0];
+
+    track.attachListeners(
+      dom.track,
+      (v) => {
+        this.setTrackPercent(v);
+      },
+      (v) => {
+        if (!this.player.item) return;
+        this.setTrackPercent(v);
+        spotify.seekTo(Math.round(this.player.item.duration_ms * v));
+      }
+    );
 
     dom.track.style.background = `linear-gradient(90deg, ${trackCol.fg} 0%, ${
       trackCol.fg
@@ -158,10 +178,11 @@ export default {
   methods: {
     win: async function (song) {
       const res = fetch(
-        `${window.location.protocol}//${window.location.host}/api/battle/win/${this.battle.token}`,
+        `${window.location.protocol}//${window.location.host}/api/battle/win/${this.battle.token}?winner=${song}`,
         { method: "POST" }
       ).then((r) => r.json());
       console.log(res);
+      this.newBattle();
     },
     fetchBattleDetails: async function () {
       await Promise.all([
@@ -170,24 +191,27 @@ export default {
       ]);
       console.log(this.battle);
     },
-    setTrackPercent: function (now) {
-      if (!this.player.item) return;
+    tickTrackPercent: function (now) {
+      if (!this.player.item || track.sliderData.active) return;
       const val =
         (this.player.progress_ms + (now - this.lastUpdateAt)) /
         this.player.item.duration_ms;
+      this.setTrackPercent(val);
+      if (this.player.is_playing)
+        window.requestAnimationFrame(this.tickTrackPercent.bind(this));
+    },
+    setTrackPercent: function (val) {
       //background: linear-gradient(90deg, red 0%, red 78%, blue 78%, blue 100%);
       dom.track.style.background = `linear-gradient(90deg, ${trackCol.fg} 0%, ${
         trackCol.fg
       } ${val * 100}%, ${trackCol.bg} ${val * 100}%, ${trackCol.bg} 100%)`;
       dom.trackDot.style.left = `${val * 100}%`;
       // console.log(this);
-      if (this.player.is_playing)
-        window.requestAnimationFrame(this.setTrackPercent.bind(this));
     },
     doCheck: async function () {
       this.player = (await spotify.getInfo()) || {};
       this.lastUpdateAt = performance.now();
-      this.setTrackPercent(this.lastUpdateAt);
+      this.tickTrackPercent(this.lastUpdateAt);
     },
     startCheck: function () {
       this.stateUpdateInt = setInterval(this.doCheck, 2000);
@@ -198,6 +222,9 @@ export default {
       if (i == 0) p = spotify.playDevice(undefined, [this.battle.a.uri]);
       else p = spotify.playDevice(undefined, [this.battle.b.uri]);
       p.then(this.doCheck);
+      this.player.progress_ms = 0;
+      this.lastUpdateAt = performance.now();
+      this.setTrackPercent(0);
     },
     playPause: function () {
       let p;
@@ -257,7 +284,7 @@ export default {
     },
     toggleDevicesMenu: async function (e) {
       console.log(e);
-      if (e.originalTarget.className != "devices") return;
+      if (e.target.className.indexOf("devices") == -1) return;
       this.devicesOpen = !this.devicesOpen;
       this.devices = (await spotify.getDevices()).devices;
     },
@@ -283,12 +310,17 @@ export default {
   }
 }
 main#battle {
-  padding-top: 20px;
+  @media only screen and (min-aspect-ratio: 11/10) {
+    padding-top: 20px;
+  }
 
   .controls {
-    padding: 20px 50px;
-    max-width: 800px;
-    margin: auto;
+    position: absolute;
+    bottom: 2vh;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0 5vw;
 
     display: grid;
     grid-template-columns: 40px auto 40px;
@@ -296,6 +328,12 @@ main#battle {
     align-items: center;
     justify-items: center;
 
+    @media only screen and (min-aspect-ratio: 11/10) {
+      position: unset;
+      padding: 20px 50px;
+      max-width: 800px;
+      margin: 10px auto;
+    }
     .play,
     .pause {
       margin: 2px;
@@ -327,8 +365,13 @@ main#battle {
       width: 40px;
       height: 40px;
       text-align: center;
-
+      z-index: 6;
+      &.open ul {
+        display: inline-block;
+      }
       ul {
+        position: relative;
+        top: 55%;
         text-align: left;
         background: var(--bg2);
         border-radius: 5px;
@@ -340,6 +383,9 @@ main#battle {
         list-style: none;
         margin: 0;
         padding: 5px;
+        z-index: 5;
+
+        box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 5px -1px;
         li {
           padding: 8px 15px;
           margin: 2px 0;
@@ -351,13 +397,25 @@ main#battle {
             background: rgba(255, 255, 255, 0.2);
           }
         }
-        &.open {
-          display: inline-block;
+
+        &::before {
+          // bottom: -20px;
+          pointer-events: none;
+          top: -20px;
+          left: 20px;
+          // right: 138px;
+          margin-left: -10px;
+          margin-right: -10px;
+          border: 10px solid transparent;
+          border-bottom-color: transparent;
+          border-bottom-color: var(--bg2);
+          position: absolute;
+          content: "";
         }
       }
 
       &:hover::before,
-      &.open::before {
+      &.opends::before {
         color: var(--accent);
       }
 
@@ -382,6 +440,11 @@ main#battle {
         rgba(0, 0, 0, 0.5) 0%,
         rgba(0, 0, 0, 0.5) 100%
       );
+
+      border: 10px solid var(--bg1);
+      border-left: none;
+      border-right: none;
+      box-sizing: content-box;
 
       span {
         $size: 15px;
@@ -453,6 +516,11 @@ main#battle {
 
   h1 {
     text-align: center;
+    margin: 0;
+    height: 10vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   article {
     padding: 0 50px;
@@ -460,8 +528,29 @@ main#battle {
 
   .versus {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr;
-    grid-template-rows: 5em min-content min-content;
+    $mobileSize: 31vh;
+    $songNameH: 1em;
+    width: 100%;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: $songNameH $mobileSize 5vh $songNameH $mobileSize;
+    grid-template-areas:
+      "TITLEA TITLEA TITLEA"
+      ". IMGA WINA"
+      "VERSUS VERSUS VERSUS"
+      "TITLEB TITLEB TITLEB"
+      ". IMGB WINB";
+    justify-content: center;
+    justify-items: center;
+    gap: 1.5vh;
+
+    @media only screen and (min-aspect-ratio: 11/10) {
+      grid-template-columns: 2fr 1fr 2fr;
+      grid-template-rows: 5em min-content min-content;
+      grid-template-areas:
+        "TITLEA . TITLEB"
+        "IMGA VERSUS IMGB"
+        "WINA . WINB";
+    }
 
     // height: 50vh;
 
@@ -473,41 +562,59 @@ main#battle {
     max-width: 800px;
     box-sizing: border-box;
 
+    // VERSUS
     span {
-      grid-row: 2/3;
-      grid-column: 2/3;
+      grid-area: VERSUS;
+      justify-self: center;
       text-align: center;
 
-      font-weight: bold;
+      font-size: 0.8em;
+      @media screen and (min-aspect-ratio: 11/10) {
+        font-size: 1em;
+        font-weight: bold;
+      }
     }
 
     h3 {
       text-align: center;
       margin: 0;
-      margin-bottom: 5px;
-      grid-row: 1/2;
+
       &.song-a {
-        grid-column: 1/2;
+        grid-area: TITLEA;
       }
 
       &.song-b {
-        grid-column: 3/4;
+        grid-area: TITLEB;
+      }
+
+      @media screen and (min-aspect-ratio: 11/10) {
+        margin-bottom: 5px;
       }
     }
 
-    img,
-    button.play-song,
-    section {
-      // width: 100%;
-      // height: 100%;
-      width: 100%;
-      grid-row: 2/3;
-      &.song-a {
-        grid-column: 1/2;
-      }
+    img {
+      width: $mobileSize;
+      // display: inline;
+      // display: none;
+    }
 
-      &.song-b {
-        grid-column: 3/4;
+    img,
+    button.play-song {
+      // width: 100%;
+      // height: 50%;
+      grid-row: 1/2;
+      grid-column: 1/2;
+
+      @media screen and (min-aspect-ratio: 11/10) {
+        width: 100%;
+        grid-row: 2/3;
+        &.song-a {
+          grid-column: 1/2;
+        }
+
+        &.song-b {
+          grid-column: 3/4;
+        }
       }
     }
 
@@ -518,16 +625,31 @@ main#battle {
       &:active {
         transform: scale(0.95);
       }
+
+      &.song-a {
+        grid-area: IMGA;
+      }
+
+      &.song-b {
+        grid-area: IMGB;
+      }
     }
 
     button.winner {
-      grid-row: 3/4;
-      grid-column: 1/2;
-      margin-top: 5px;
-      width: 50%;
-      justify-self: center;
+      // width: 50%;
+      // margin: 0 0 0 10px;
+      justify-self: left;
+
       &.song-a {
-        grid-column: 3/4;
+        grid-area: WINA;
+      }
+      &.song-b {
+        grid-area: WINB;
+      }
+
+      @media screen and (min-aspect-ratio: 11/10) {
+        justify-self: center;
+        margin: 5px 0 0 0;
       }
     }
 
@@ -566,6 +688,14 @@ main#battle {
         background: var(--accent);
         transition: background-color 0.1s ease-in-out;
       }
+    }
+  }
+
+  article.text {
+    position: absolute;
+    top: 100vh;
+    @media screen and (min-aspect-ratio: 11/10) {
+      position: unset;
     }
   }
 }

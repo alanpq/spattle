@@ -15,7 +15,9 @@ export const authedFetch = (url, options = {}) => {
     // console.log(json)
     if (json.error) {
       if (json.error.status == 401 && json.error.message == "The access token expired") {
-        console.log('time to refresh')
+        // console.log('time to refresh')
+        // alert("spotify token expired (this popup is temporary)")
+        // window.location = "/";
       }
       throw new Error(JSON.stringify(json.error));
     }
