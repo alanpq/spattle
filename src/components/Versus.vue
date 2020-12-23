@@ -6,7 +6,14 @@
       v-bind:song="$data._battle.a"
       @onClick="play(0)"
     />
-    <button class="song-a winner" @click="win(0)">Winner!</button>
+    <button
+      class="song-a winner"
+      @click="win(0)"
+      @mouseover="$event.target.innerText = 'Winner!'"
+      @mouseleave="$event.target.innerText = 'Choose a winner'"
+    >
+      Choose a winner
+    </button>
     <span>VERSUS</span>
     <h3 class="song-b">{{ $data._battle.b.name }}</h3>
     <SongView
@@ -14,7 +21,14 @@
       v-bind:song="$data._battle.b"
       @onClick="play(1)"
     />
-    <button class="song-b winner" @click="win(1)">Winner!</button>
+    <button
+      class="song-b winner"
+      @click="win(1)"
+      @mouseover="$event.target.innerText = 'Winner!'"
+      @mouseleave="$event.target.innerText = 'Choose a winner'"
+    >
+      Choose a winner
+    </button>
   </article>
 </template>
 
@@ -179,6 +193,8 @@ export default {
     // width: 50%;
     // margin: 0 0 0 10px;
     justify-self: left;
+
+    width: 150px;
 
     &.song-a {
       grid-area: WINA;
