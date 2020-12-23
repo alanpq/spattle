@@ -163,8 +163,6 @@ app.post('/api/battle/win/:token', async (req, res) => {
 
   delete battles[tok];
 
-  // TODO: match history (for reverting bad battles)
-
   res.status(200).json({
     code: 200,
   })
