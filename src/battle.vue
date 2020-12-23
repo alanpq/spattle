@@ -19,15 +19,6 @@ import TrackAdder from "./components/TrackAdder";
 
 import * as spotify from "./spotify";
 
-const fetchTrackDetails = async (obj) => {
-  const track = await spotify.getTrack(obj.id);
-  console.log(track);
-  Object.assign(obj, track);
-  if (track.images) obj.img = track.images[0].url;
-  else obj.img = track.album.images[0].url;
-};
-
-window.addEventListener("load", () => {});
 const playbackState = {};
 
 export default {
@@ -56,19 +47,11 @@ export default {
   },
   mounted: function () {
     this.startCheck();
-    this.newBattle();
   },
   beforeUnmount: function () {
     clearInterval(this.stateUpdateInt);
   },
   methods: {
-    fetchBattleDetails: async function () {
-      await Promise.all([
-        fetchTrackDetails(this.battle.a),
-        fetchTrackDetails(this.battle.b),
-      ]);
-      console.log(this.battle);
-    },
     doCheck: async function () {
       this.player = (await spotify.getInfo()) || {};
       this.lastUpdateAt = performance.now();
@@ -76,18 +59,6 @@ export default {
     },
     startCheck: function () {
       this.stateUpdateInt = setInterval(this.doCheck, 2000);
-    },
-    newBattle: async function () {
-      console.log("Getting new battle..");
-      const ids = await (
-        await fetch(
-          `${window.location.protocol}//${window.location.host}/api/battle`
-        )
-      ).json();
-      this.battle.a.id = ids.a;
-      this.battle.b.id = ids.b;
-      this.battle.token = ids.token;
-      this.fetchBattleDetails();
     },
   },
   components: {

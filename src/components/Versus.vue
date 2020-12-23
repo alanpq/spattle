@@ -22,6 +22,14 @@
 import SongView from "./SongView";
 import PlayerControls from "./PlayerControls";
 
+const fetchTrackDetails = async (obj) => {
+  const track = await spotify.getTrack(obj.id);
+  console.log(track);
+  Object.assign(obj, track);
+  if (track.images) obj.img = track.images[0].url;
+  else obj.img = track.album.images[0].url;
+};
+
 import * as spotify from "../spotify";
 export default {
   props: {
@@ -35,6 +43,9 @@ export default {
   components: {
     SongView,
     PlayerControls,
+  },
+  mounted: function () {
+    this.newBattle();
   },
   methods: {
     play: function (i) {
@@ -54,6 +65,26 @@ export default {
       ).then((r) => r.json());
       console.log(res);
       this.newBattle();
+    },
+
+    fetchBattleDetails: async function () {
+      await Promise.all([
+        fetchTrackDetails(this.battle.a),
+        fetchTrackDetails(this.battle.b),
+      ]);
+      console.log(this.battle);
+    },
+    newBattle: async function () {
+      console.log("Getting new battle..");
+      const ids = await (
+        await fetch(
+          `${window.location.protocol}//${window.location.host}/api/battle`
+        )
+      ).json();
+      this.battle.a.id = ids.a;
+      this.battle.b.id = ids.b;
+      this.battle.token = ids.token;
+      this.fetchBattleDetails();
     },
   },
 };
