@@ -75,6 +75,8 @@ client.connect().then(() => {
 
 app.use(json())
 
+app.set('trust proxy', process.env.PROXY === "true")
+
 app.use('/dist', express.static('dist'))
 app.use('/', express.static('dist'))
 app.get('/api/challenge', (req, res) => {
@@ -143,6 +145,8 @@ app.post('/api/battle/win/:token', async (req, res) => {
 
   historyCol.insertOne({
     token: tok,
+    timestamp: Date.now(),
+    ip: req.ip, // TODO: make sure this works on prod
     a: {
       id: battle.a,
       old: a.rating,
