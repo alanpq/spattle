@@ -9,6 +9,7 @@ import { Collection, Db, MongoClient } from 'mongodb';
 import { allowedNodeEnvironmentFlags } from 'process';
 import { json } from 'body-parser';
 import * as fetch from 'node-fetch';
+import { v4 } from 'uuid';
 
 const uri = "mongodb://127.0.0.1:27017/"
 const client = new MongoClient(uri);
@@ -18,18 +19,29 @@ const PORT = process.env.PORT || 3000
 
 const kFactor = 32;
 
-
-const getTrack = async (id: string) => {
-  return await (await fetch.default(`https://api.spotify.com/v1/tracks/${id}`)).json();
-}
-
 const getToken = async () => {
   //https://open.spotify.com/get_access_token?reason=transport&productType=web_player
   return (await (await fetch.default("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")).json()).accessToken;
 }
 
-let token;
+let token: string;
 getToken().then(t => { token = t })
+
+export const authedFetch = (url: string, options: any = {}) => {
+  if (!options.headers)
+    options.headers = {}
+  options.headers["Authorization"] = `Bearer ${token}`
+  return fetch.default(url, options)
+}
+
+const getTrack = async (id: string) => {
+  return await (await authedFetch(`https://api.spotify.com/v1/tracks/${id}`)).json();
+}
+
+const getTracks = async (ids: [string]) => {
+  return await (await authedFetch(`https://api.spotify.com/v1/tracks?ids=${ids.join(",")}`)).json();
+}
+
 
 const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", ".", "-", "~"]
 for (const x of Array(26).keys()) {
@@ -37,8 +49,6 @@ for (const x of Array(26).keys()) {
   chars.push(String.fromCharCode('A'.charCodeAt(0) + x))
 }
 // console.log(chars)
-
-const openVerifiers: { [challenge: string]: string } = {};
 
 const genChallenge = () => {
   const buf = crypto.randomBytes(128);
@@ -82,14 +92,28 @@ app.get('/api/challenge', (req, res) => {
   res.json({ verifier, challenge: challenge })
 })
 
+const battles: { [token: string]: { a: string, b: string } } = {};
+
 app.get('/api/battle', async (req, res) => {
-  const out: { a: string, b: string } = { a: '', b: '' }
-  let first = true;
-  await coll.aggregate([{ '$sample': { 'size': 2 } }]).forEach((item) => {
-    out[first ? 'a' : 'b'] = item.id;
-    first = false;
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const sample: any = await coll.aggregate([{ '$sample': { 'size': 2 } }]).toArray();
+  const token = v4();
+  const a = sample[0].id;
+  const b = sample[1].id;
+  battles[token] = { a, b };
+  res.json({ token, a, b });
+})
+
+app.post('/api/battle/win/:token', async (req, res) => {
+  console.log(req.params.token)
+  if (!req.params.token) return res.status(400).json({ code: 400, message: "No battle token provided!" });
+  const tok: string = req.params.token as string;
+  if (!battles[tok]) return res.status(404).json({ code: 401, message: "Invalid battle!" })
+
+  res.status(200).json({
+    code: 200,
+    token: 'asdasd'
   })
-  res.json(out);
 })
 
 app.post('/api/addtrack/:id', async (req, res) => {
@@ -109,10 +133,41 @@ app.post('/api/addtrack/:id', async (req, res) => {
   res.status(200).json({ code: 200 })
 })
 
-app.post('/api/addtracks', (req, res) => {
+app.options('/api/addtracks', async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*")
-  console.log(req.body.tracks)
-  res.json({ code: 500 })
+  res.setHeader("Access-Control-Allow-Method", "POST")
+  res.setHeader("Access-Control-Allow-Headers", "*")
+  res.setHeader("Access-Control-Max-Age", "120")
+
+  res.send();
+})
+
+app.post('/api/addtracks', async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  if (!req.body.tracks) return res.status(403).send();
+  const tracks = (await getTracks(req.body.tracks)).tracks;
+  let count = 0;
+  for (let i = 0; i < req.body.tracks.length; i++) {
+    if (!tracks[i] || !req.body.tracks[i]) continue;
+    if (req.body.tracks[i] != tracks[i].id) continue;
+    // console.log(tracks[i].id)
+    coll.insertOne({
+      _id: tracks[i].id,
+      id: tracks[i].id,
+      rating: 500,
+      battles: 0,
+    }).then(() => {
+      count += 1;
+    }).catch((err) => {
+      if (err.code != 11000)
+        console.error(err);
+    })
+  }
+  res.json({ code: 200, count })
+})
+
+app.get('/*', (req, res) => {
+  res.sendFile(__dirname + "/index.html");
 })
 
 // app.get('/', (req, res) => res.sendFile(__dirname + "/index.html"));

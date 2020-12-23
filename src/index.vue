@@ -13,7 +13,9 @@
 import "regenerator-runtime";
 const getChallenge = async () => {
   const res = await (
-    await fetch("http://" + window.location.hostname + ":3000/api/challenge")
+    await fetch(
+      `${window.location.protocol}//${window.location.host}/api/challenge`
+    )
   ).json();
   console.log(res);
   console.log("challenge:", res.challenge);
@@ -29,8 +31,14 @@ const constructAuthURI = async () => {
   const params = new URLSearchParams();
   params.append("client_id", "3a25adc518944ba0b50c6a1376ab6a8a"); // TODO: fetch client id from server
   params.append("response_type", "code");
-  params.append("scope", "streaming");
-  params.append("redirect_uri", "http://localhost:8080"); // TODO: change redirect url
+  params.append(
+    "scope",
+    "streaming user-read-playback-state app-remote-control"
+  );
+  params.append(
+    "redirect_uri",
+    `${window.location.protocol}//${window.location.host}`
+  ); // TODO: change redirect url
   params.append("code_challenge_method", "S256");
   const challenge = await getChallenge();
   params.append("code_challenge", challenge);

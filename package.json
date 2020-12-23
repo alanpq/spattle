@@ -19,6 +19,7 @@
     "mongodb": "^3.6.3",
     "node-fetch": "^2.6.1",
     "pug": "^3.0.0",
+    "uuid": "^8.3.2",
     "vue": "^2.5.11"
   },
   "browserslist": [
@@ -32,6 +33,7 @@
     "@types/mongodb": "^3.6.3",
     "@types/node": "^14.14.14",
     "@types/node-fetch": "^2.5.7",
+    "@types/uuid": "^8.3.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",
