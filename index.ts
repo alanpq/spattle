@@ -137,7 +137,10 @@ app.post('/api/battle/win/:token', async (req, res) => {
   console.log(`updating song '${battle.a}' to rating ${nA}`)
   console.log(`updating song '${battle.b}' to rating ${nB}`)
 
-  delete battles[tok]; // TODO: delete battles after timeout
+  delete battles[tok];
+  setTimeout(() => { // TODO: test this works
+    delete battles[tok];
+  }, 1800000) // 30 minutes
 
   // TODO: match history (for reverting bad battles)
 
