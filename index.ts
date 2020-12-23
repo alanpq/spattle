@@ -150,11 +150,13 @@ app.post('/api/battle/win/:token', async (req, res) => {
     a: {
       id: battle.a,
       old: a.rating,
+      delta: nA - a.rating,
       new: nA
     },
     b: {
       id: battle.b,
       old: b.rating,
+      delta: nB - b.rating,
       new: nB
     },
   })
