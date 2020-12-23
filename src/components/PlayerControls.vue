@@ -15,7 +15,7 @@
     <div :class="{ devices: true, open }" @click="toggleDevicesMenu($event)">
       <ul>
         <li
-          v-for="device in $data._devices"
+          v-for="device in devices"
           v-bind:key="device.id"
           @click="setDevice(device.id)"
         >
@@ -40,13 +40,17 @@ const trackCol = {
 
 export default {
   name: "PlayerControls",
+  props: {
+    player: Object,
+  },
   data: function () {
     return {
       _player: this.player,
-      _devices: this.devices,
+      devices: [{ name: "Test Device 1" }, { name: "Test Device 2" }],
       open: false,
       track: null,
       trackDot: null,
+      lastUpdateAt: 0,
     };
   },
   mounted: function () {
@@ -65,6 +69,8 @@ export default {
       }
     );
 
+    this.tickTrackPercent();
+
     this.track.style.background = `linear-gradient(90deg, ${trackCol.fg} 0%, ${
       trackCol.fg
     } ${0 * 100}%, ${trackCol.bg} ${0 * 100}%, ${trackCol.bg} 100%)`;
@@ -78,13 +84,14 @@ export default {
     },
 
     tickTrackPercent: function (now) {
+      window.requestAnimationFrame(this.tickTrackPercent.bind(this));
+
       if (!this.player.item || track.sliderData.active) return;
+      if (!this.player.is_playing) return;
       const val =
-        (this.player.progress_ms + (now - this.lastUpdateAt)) /
+        (this.player.progress_ms + (now - this.player.lastUpdateAt)) /
         this.player.item.duration_ms;
       this.setTrackPercent(val);
-      if (this.player.is_playing)
-        window.requestAnimationFrame(this.tickTrackPercent.bind(this));
     },
     setTrackPercent: function (val) {
       //background: linear-gradient(90deg, red 0%, red 78%, blue 78%, blue 100%);
@@ -102,14 +109,11 @@ export default {
     },
     toggleDevicesMenu: async function (e) {
       console.log(e);
+      console.log(this.open);
       if (e.target.className.indexOf("devices") == -1) return;
-      this.devicesOpen = !this.devicesOpen;
+      this.open = !this.open;
       this.devices = (await spotify.getDevices()).devices;
     },
-  },
-  props: {
-    player: Object,
-    devices: Array,
   },
   components: {
     PlaySVG,

@@ -34,10 +34,12 @@ import * as spotify from "../spotify";
 export default {
   props: {
     battle: Object,
+    player: Object,
   },
   data: function () {
     return {
       _battle: this.battle,
+      // _player: this.player,
     };
   },
   components: {
@@ -56,7 +58,7 @@ export default {
       p.then(this.doCheck);
       this.player.progress_ms = 0;
       this.lastUpdateAt = performance.now();
-      this.setTrackPercent(0);
+      // this.setTrackPercent(0);
     },
     win: async function (song) {
       const res = fetch(

@@ -2,7 +2,7 @@
   <main id="battle">
     <h1>Which song is better?</h1>
     <!-- TODO: add 'play both' button -->
-    <Versus v-bind:battle="battle" />
+    <Versus v-bind:battle="battle" v-bind:player="player" />
     <PlayerControls v-bind:player="player" v-bind:devices="devices" />
     <!-- <button @click="newBattle()">New Battle</button> -->
     <TrackAdder />
@@ -39,10 +39,8 @@ export default {
         },
       },
       devicesOpen: false,
-      devices: [{ name: "Test Device 1" }, { name: "Test Device 2" }],
       player: playbackState,
       stateUpdateInt: "",
-      lastUpdateAt: 0,
     };
   },
   mounted: function () {
@@ -54,7 +52,7 @@ export default {
   methods: {
     doCheck: async function () {
       this.player = (await spotify.getInfo()) || {};
-      this.lastUpdateAt = performance.now();
+      this.player.lastUpdateAt = performance.now();
       // this.tickTrackPercent(this.lastUpdateAt);
     },
     startCheck: function () {
