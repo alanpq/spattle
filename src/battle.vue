@@ -3,7 +3,7 @@
     <h1>Which song is better?</h1>
     <!-- TODO: add 'play both' button -->
     <Versus v-bind:battle="battle" v-bind:player="player" />
-    <PlayerControls v-bind:player="player" v-bind:devices="devices" />
+    <PlayerControls v-bind:player="player" />
     <!-- <button @click="newBattle()">New Battle</button> -->
     <TrackAdder />
   </main>

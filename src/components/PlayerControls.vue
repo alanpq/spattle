@@ -12,7 +12,11 @@
     </button>
     <section class="track"><span></span></section>
     <!-- TODO: auto refresh devices -->
-    <div :class="{ devices: true, open }" @click="toggleDevicesMenu($event)">
+    <div
+      v-if="devices != undefined"
+      :class="{ devices: true, open }"
+      @click="toggleDevicesMenu($event)"
+    >
       <ul>
         <li
           v-for="device in devices"
