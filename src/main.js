@@ -52,7 +52,7 @@ const loadOrUpdate = async () => {
       formData.append("client_id", "3a25adc518944ba0b50c6a1376ab6a8a") // TODO: fetch client id from server
       formData.append("grant_type", "authorization_code")
       formData.append("code", params.get('code'))
-      formData.append("redirect_uri", window.location.protocol + "//" + window.location.host) // TODO: change redirect url
+      formData.append("redirect_uri", window.location.protocol + "//" + window.location.host)
       console.log("verifier:", localStorage.getItem("verifier"))
       formData.append("code_verifier", localStorage.getItem("verifier"))
       const res = await (fetch("https://accounts.spotify.com/api/token", {

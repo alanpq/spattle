@@ -38,7 +38,7 @@ const constructAuthURI = async () => {
   params.append(
     "redirect_uri",
     `${window.location.protocol}//${window.location.host}`
-  ); // TODO: change redirect url
+  );
   params.append("code_challenge_method", "S256");
   const challenge = await getChallenge();
   params.append("code_challenge", challenge);
