@@ -67,6 +67,10 @@ export const authedFetch = (url, options = {}) => {
   })
 }
 
+
+export const search = async (query) => {
+  return await authedFetch(`https://api.spotify.com/v1/search?type=album,track&q=${encodeURIComponent(query)}`);
+}
 /**
  * 
  * @param {string} id Track ID
@@ -76,16 +80,20 @@ export const getTrack = async (id) => {
   return await authedFetch(`https://api.spotify.com/v1/tracks/${id}`);
 }
 
+export const getTracks = async (ids) => {
+  return await authedFetch(`https://api.spotify.com/v1/tracks/?ids=${ids.join(',')}`);
+}
+
+export const getAlbums = async (ids) => {
+  return await authedFetch(`https://api.spotify.com/v1/albums/?ids=${ids.join(',')}`);
+}
+
 export const getPlaylists = async (limit = 50, offset = 0) => {
   return await authedFetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`);
 }
 
 export const getPlaylist = async (id) => {
   return await authedFetch(`https://api.spotify.com/v1/playlists/${id}/tracks`);
-}
-
-export const getAlbums = async (ids) => {
-  return await authedFetch(`https://api.spotify.com/v1/albums/${ids.join(',')}`);
 }
 
 export const getDevices = async () => {
@@ -114,6 +122,7 @@ export const playDevice = async (ctx_uri = undefined, uris = undefined, offset =
     })
   })
 }
+
 export const pauseDevice = async () => {
   return await authedFetch('https://api.spotify.com/v1/me/player/pause', {
     method: "PUT",
