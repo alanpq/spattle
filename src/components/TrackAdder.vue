@@ -31,7 +31,7 @@
           v-for="result in search.albums.items"
           v-bind:key="result.id"
           v-bind:result="result"
-          @add-track="addTrack(result.id)"
+          @add-track="addTracks(result.details.tracks.items.map((e) => e.id))"
         />
       </ul>
     </section>
@@ -78,19 +78,6 @@ import SearchResult from "./SearchResult";
 
 import * as spotify from "../spotify";
 
-const addTracks = async (ids) => {
-  console.log(ids);
-  return await fetch(
-    `${window.location.protocol}//${window.location.host}/api/addtracks/`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ tracks: ids }),
-    }
-  ).then((res) => res.json());
-};
 export default {
   props: {},
   data: function () {
@@ -122,6 +109,19 @@ export default {
           )
         ).text()
       );
+    },
+    addTracks: async (ids) => {
+      console.log(ids);
+      return await fetch(
+        `${window.location.protocol}//${window.location.host}/api/addtracks/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ tracks: ids }),
+        }
+      ).then((res) => res.json());
     },
     addPlaylists: async () => {
       document.querySelector(".playlist-add button").className = "loading";
