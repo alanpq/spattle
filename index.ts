@@ -11,6 +11,16 @@ import { json } from 'body-parser';
 import * as fetch from 'node-fetch';
 import { v4 } from 'uuid';
 
+import { performance, PerformanceObserver } from 'perf_hooks'
+
+const perfObserver = new PerformanceObserver((items) => {
+  items.getEntries().forEach((entry) => {
+    console.log(entry)
+  })
+})
+
+perfObserver.observe({ entryTypes: ["measure"], buffered: true })
+
 const uri = "mongodb://127.0.0.1:27017/"
 const client = new MongoClient(uri);
 
@@ -99,12 +109,21 @@ const battles: { [token: string]: { a: string, b: string } } = {};
 
 app.get('/api/battle', async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  performance.mark("battle-endpoint-start")
+  performance.mark("battle-aggregate-start")
   const sample: any = await coll.aggregate([{ '$sample': { 'size': 2 } }]).toArray();
+  performance.mark("battle-aggregate-end")
+
   const token = v4();
   const a = sample[0].id;
   const b = sample[1].id;
   battles[token] = { a, b };
   res.json({ token, a, b });
+  performance.mark("battle-endpoint-end")
+
+  performance.measure("battle", "battle-endpoint-start", "battle-endpoint-end")
+  performance.measure("battle-db-aggregate", "battle-aggregate-start", "battle-aggregate-end")
+
   setTimeout(() => { // TODO: test this works
     delete battles[token];
   }, 1800000) // 30 minutes
