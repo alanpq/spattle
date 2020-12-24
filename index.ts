@@ -5,7 +5,7 @@ import * as crypto from 'crypto';
 
 import express from 'express';
 import { enc, SHA256 } from 'crypto-js';
-import { Collection, Db, MongoClient } from 'mongodb';
+import { AggregationCursor, Collection, Db, MongoClient } from 'mongodb';
 import { allowedNodeEnvironmentFlags } from 'process';
 import { json } from 'body-parser';
 import * as fetch from 'node-fetch';
@@ -111,18 +111,30 @@ app.get('/api/battle', async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   performance.mark("battle-endpoint-start")
   performance.mark("battle-aggregate-start")
-  const sample: any = await coll.aggregate([{ '$sample': { 'size': 2 } }]).toArray();
+  const cursor: AggregationCursor = coll.aggregate([{ '$sample': { 'size': 2 } }]);
   performance.mark("battle-aggregate-end")
 
-  const token = v4();
-  const a = sample[0].id;
-  const b = sample[1].id;
-  battles[token] = { a, b };
-  res.json({ token, a, b });
-  performance.mark("battle-endpoint-end")
 
-  performance.measure("battle", "battle-endpoint-start", "battle-endpoint-end")
-  performance.measure("battle-db-aggregate", "battle-aggregate-start", "battle-aggregate-end")
+  performance.mark("battle-cursor-start")
+  const data: string[] = [];
+  cursor.on('data', (d) => {
+    data.push(d.id)
+  })
+  cursor.on('end', () => {
+    performance.mark("battle-cursor-end")
+
+    const token = v4();
+    // const a = sample[0].id;
+    // const b = sample[1].id;
+    battles[token] = { a: data[0], b: data[1] };
+    res.json({ token, a: data[0], b: data[1] });
+    performance.mark("battle-endpoint-end")
+
+    performance.measure("battle", "battle-endpoint-start", "battle-endpoint-end")
+    performance.measure("battle-db-aggregate", "battle-aggregate-start", "battle-aggregate-end")
+    performance.measure("battle-db-cursor", "battle-cursor-start", "battle-cursor-end")
+
+  })
 
   setTimeout(() => { // TODO: test this works
     delete battles[token];
