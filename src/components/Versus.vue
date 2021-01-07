@@ -1,6 +1,15 @@
 <template>
   <article class="versus">
     <h3 class="song-a">{{ $data._battle.a.name }}</h3>
+    <h4 class="song-a">
+      {{
+        $data._battle.a.artists
+          .reduce((acc, artist) => {
+            return `${acc}, ${artist.name}`;
+          }, "")
+          .slice(2)
+      }}
+    </h4>
     <SongView
       customClass="song-a"
       v-bind:song="$data._battle.a"
@@ -16,6 +25,15 @@
     </button>
     <span>VERSUS</span>
     <h3 class="song-b">{{ $data._battle.b.name }}</h3>
+    <h4 class="song-b">
+      {{
+        $data._battle.b.artists
+          .reduce((acc, artist) => {
+            return `${acc}, ${artist.name}`;
+          }, "")
+          .slice(2)
+      }}
+    </h4>
     <SongView
       customClass="song-b"
       v-bind:song="$data._battle.b"
@@ -110,19 +128,22 @@ export default {
 .versus {
   display: grid;
   $mobileSize: 31vh;
-  $songNameH: 1em;
+  $artistH: 0.5em;
+  $songNameH: 1.5em - $artistH;
   width: 100%;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: $songNameH $mobileSize 5vh $songNameH $mobileSize;
+  grid-template-rows: $songNameH $artistH $mobileSize 5vh $songNameH $artistH $mobileSize;
   grid-template-areas:
     "TITLEA TITLEA TITLEA"
     ". IMGA WINA"
     "VERSUS VERSUS VERSUS"
     "TITLEB TITLEB TITLEB"
+    "ARTISTB ARTISTB ARTISTB"
     ". IMGB WINB";
   justify-content: center;
   justify-items: center;
-  gap: 1.5vh;
+  $gap: 1.5vh;
+  gap: $gap;
 
   @media only screen and (min-aspect-ratio: 11/10) {
     grid-template-columns: 2fr 1fr 2fr;
@@ -170,6 +191,19 @@ export default {
 
     @media screen and (min-aspect-ratio: 11/10) {
       margin-bottom: 5px;
+    }
+  }
+
+  h4 {
+    text-align: center;
+    margin: 0;
+    align-self: flex-end;
+    &.song-a {
+      grid-area: ARTISTA;
+    }
+
+    &.song-b {
+      grid-area: ARTISTB;
     }
   }
 
