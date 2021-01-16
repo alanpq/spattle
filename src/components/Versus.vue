@@ -1,15 +1,13 @@
 <template>
   <article class="versus">
-    <h3 class="song-a">{{ $data._battle.a.name }}</h3>
-    <h4 class="song-a">
-      {{
-        $data._battle.a.artists
-          .reduce((acc, artist) => {
-            return `${acc}, ${artist.name}`;
-          }, "")
-          .slice(2)
-      }}
-    </h4>
+    <section class="title song-a">
+      <h3 class="song-a">{{ $data._battle.a.name }}</h3>
+      <h4 class="song-a">
+        {{
+          $data._battle.a.artistStr
+        }}
+      </h4>
+    </section>
     <SongView
       customClass="song-a"
       v-bind:song="$data._battle.a"
@@ -24,16 +22,12 @@
       Choose a winner
     </button>
     <span>VERSUS</span>
-    <h3 class="song-b">{{ $data._battle.b.name }}</h3>
-    <h4 class="song-b">
-      {{
-        $data._battle.b.artists
-          .reduce((acc, artist) => {
-            return `${acc}, ${artist.name}`;
-          }, "")
-          .slice(2)
-      }}
-    </h4>
+    <section class="title song-b">
+      <h3 class="song-b">{{ $data._battle.b.name }}</h3>
+      <h4 class="song-b">
+        {{ $data._battle.b.artistStr }}
+      </h4>
+    </section>
     <SongView
       customClass="song-b"
       v-bind:song="$data._battle.b"
@@ -60,6 +54,11 @@ const fetchTrackDetails = async (obj) => {
   Object.assign(obj, track);
   if (track.images) obj.img = track.images[0].url;
   else obj.img = track.album.images[0].url;
+
+  const c = obj.artists.reduce((acc, artist) => {
+    return `${acc}, ${artist.name}`;
+  }, "");
+  obj.artistStr = c.slice(2, 27) + ((c.length > 27) ? "..." : "")
 };
 
 import * as spotify from "../spotify";
@@ -106,7 +105,8 @@ export default {
         fetchTrackDetails(this.battle.a),
         fetchTrackDetails(this.battle.b),
       ]);
-      console.log(this.battle);
+      console.log(this.battle.a.artistStr)
+      console.log(this.battle.b.artistStr)
     },
     newBattle: async function () {
       console.log("Getting new battle..");
@@ -181,16 +181,8 @@ export default {
     text-align: center;
     margin: 0;
 
-    &.song-a {
-      grid-area: TITLEA;
-    }
-
-    &.song-b {
-      grid-area: TITLEB;
-    }
-
     @media screen and (min-aspect-ratio: 11/10) {
-      margin-bottom: 5px;
+      margin-bottom: 0px;
     }
   }
 
@@ -214,12 +206,23 @@ export default {
   }
 
   section {
-    &.song-a {
-      grid-area: IMGA;
-    }
+    &.song {
+      &.song-a {
+        grid-area: IMGA;
+      }
 
-    &.song-b {
-      grid-area: IMGB;
+      &.song-b {
+        grid-area: IMGB;
+      }
+    }
+    &.title {
+      &.song-a {
+        grid-area: TITLEA;
+      }
+
+      &.song-b {
+        grid-area: TITLEB;
+      }
     }
   }
 
