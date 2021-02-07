@@ -39,6 +39,58 @@
 </template>
 
 <style lang="scss">
+.playlist-add {
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+    align-items: center;
+
+    width: 100%;
+
+    button {
+      min-width: fit-content;
+      word-wrap: none;
+      white-space: nowrap;
+      text-overflow: clip;
+      z-index: 1;
+      &.loading {
+        color: transparent;
+        padding: 3px 0px;
+        &::before {
+          content: " ";
+          width: 1em;
+          height: 1em;
+          display: inline-block;
+          position: relative;
+          top: 2px;
+          left: calc(50% - 10px);
+          // right: 10px;
+          border-radius: 50%;
+          border: 8px solid #fff;
+          animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+          border-color: rgba(255, 255, 255, 0.486) transparent transparent
+            transparent;
+        }
+      }
+    }
+
+    span {
+      color: var(--fg2);
+      position: relative;
+      transform: translateY(-100%);
+      transition: transform 0.1s ease-in-out, opacity 0.1s ease-in-out;
+      opacity: 0;
+      &.active {
+        opacity: 1;
+        transform: translateY(0%);
+      }
+      em {
+        font-style: normal;
+        font-weight: bold;
+      }
+    }
+  }
+
 section.results {
   margin: auto;
   margin-top: 25px;
@@ -124,8 +176,8 @@ export default {
         }
       ).then((res) => res.json());
     },
-    addPlaylists: async () => {
-      document.querySelector(".playlist-add button").className = "loading";
+    addPlaylists: async function () {
+      this.playlistAddBtn.className = "loading";
       const uris = [];
       const playlists = (await spotify.getPlaylists()).items;
       console.log(playlists);
@@ -144,19 +196,20 @@ export default {
       const promises = [];
       for (let i = 0; i < uris.length; i += 50) {
         promises.push(
-          addTracks(uris.slice(i, i + 50)).then((json) => {
+          this.addTracks(uris.slice(i, i + 50)).then((json) => {
             sum += json.count;
           })
         );
       }
-      Promise.all(promises).then(() => {
+      const finish = () => {
         this.playlistAddBtn.className = "";
         this.playlistAddMsg.className = "active";
         this.playlistAddMsg.children[0].innerText = sum;
         setTimeout(() => {
           this.playlistAddMsg.className = "";
         }, 5000);
-      });
+      }
+      Promise.all(promises).then(finish).catch(finish); // FIXME: add a timeout maybe
     },
     searchDebounce: async function (q) {
       const result = await spotify.search(q);

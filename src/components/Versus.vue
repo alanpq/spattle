@@ -12,15 +12,16 @@
       customClass="song-a"
       v-bind:song="$data._battle.a"
       @onClick="play(0)"
+      @win="win(0)"
     />
-    <button
+    <!-- <button
       class="song-a winner"
       @click="win(0)"
       @mouseover="$event.target.innerText = 'Winner!'"
       @mouseleave="$event.target.innerText = 'Choose a winner'"
     >
       Choose a winner
-    </button>
+    </button> -->
     <span>VERSUS</span>
     <section class="title song-b">
       <h3 class="song-b">{{ $data._battle.b.name }}</h3>
@@ -32,15 +33,16 @@
       customClass="song-b"
       v-bind:song="$data._battle.b"
       @onClick="play(1)"
+      @win="win(1)"
     />
-    <button
+    <!-- <button
       class="song-b winner"
       @click="win(1)"
       @mouseover="$event.target.innerText = 'Winner!'"
       @mouseleave="$event.target.innerText = 'Choose a winner'"
     >
       Choose a winner
-    </button>
+    </button> -->
   </article>
 </template>
 

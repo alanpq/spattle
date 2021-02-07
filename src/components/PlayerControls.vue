@@ -17,10 +17,11 @@
       :class="{ devices: true, open }"
       @click="toggleDevicesMenu($event)"
     >
-      <ul>
+      <ul> <!-- TODO: device icons -->
         <li
           v-for="device in devices"
           v-bind:key="device.id"
+          v-bind:class="{active: device.is_active}"
           @click="setDevice(device.id)"
         >
           {{ device.name }}
@@ -50,7 +51,7 @@ export default {
   data: function () {
     return {
       _player: this.player,
-      devices: [{ name: "Test Device 1" }, { name: "Test Device 2" }],
+      devices: [],
       open: false,
       track: null,
       trackDot: null,
@@ -112,11 +113,10 @@ export default {
       console.log(await spotify.switchDevice(id));
     },
     toggleDevicesMenu: async function (e) {
-      console.log(e);
-      console.log(this.open);
       if (e.target.className.indexOf("devices") == -1) return;
       this.open = !this.open;
       this.devices = (await spotify.getDevices()).devices;
+      console.log(this.devices);
     },
   },
   components: {
@@ -134,6 +134,8 @@ export default {
   right: 0;
   padding: 0;
   margin: 0 5vw;
+
+  text-align: left;
 
   display: grid;
   grid-template-columns: 40px auto 40px;
@@ -208,6 +210,13 @@ export default {
         }
         &:active {
           background: rgba(255, 255, 255, 0.2);
+        }
+        &.active {
+          background: var(--accent);
+
+          &:hover {
+            background: var(--accentLight);
+          }
         }
       }
 

@@ -3,6 +3,7 @@
     <h1>Which song is better?</h1>
     <!-- TODO: add 'play both' button -->
     <Versus v-bind:battle="battle" v-bind:player="player" />
+    <span class="nowplaying">{{(player.item || {name:''}).name}}</span>
     <PlayerControls v-bind:player="player" />
     <!-- <button @click="newBattle()">New Battle</button> -->
     <TrackAdder />
@@ -84,54 +85,13 @@ main#battle {
     padding-top: 20px;
   }
 
-  .playlist-add {
-    display: flex;
-    flex-direction: column;
-    width: min-content;
-    align-items: center;
+  text-align: center;
 
-    button {
-      min-width: fit-content;
-      word-wrap: none;
-      white-space: nowrap;
-      text-overflow: clip;
-      z-index: 1;
-      &.loading {
-        color: transparent;
-        padding: 3px 0px;
-        &::before {
-          content: " ";
-          width: 1em;
-          height: 1em;
-          display: inline-block;
-          position: relative;
-          top: 2px;
-          left: calc(50% - 10px);
-          // right: 10px;
-          border-radius: 50%;
-          border: 8px solid #fff;
-          animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-          border-color: rgba(255, 255, 255, 0.486) transparent transparent
-            transparent;
-        }
-      }
-    }
-
-    span {
-      color: var(--fg2);
-      position: relative;
-      transform: translateY(-100%);
-      transition: transform 0.1s ease-in-out, opacity 0.1s ease-in-out;
-      opacity: 0;
-      &.active {
-        opacity: 1;
-        transform: translateY(0%);
-      }
-      em {
-        font-style: normal;
-        font-weight: bold;
-      }
-    }
+  .nowplaying {
+    position: relative;
+    top: 20px;
+    overflow: hidden;
+    font-size: .9em;
   }
 
   h1 {
