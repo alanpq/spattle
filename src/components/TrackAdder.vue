@@ -15,7 +15,7 @@
       type="text"
       placeholder="Song/Album name"
     />
-    <section class="results" v-if="search != {}">
+    <section class="results" v-if="(search.tracks != undefined || search.albums != undefined)">
       <h2 class="track">Tracks</h2>
       <ul class="track result" v-if="search.tracks != undefined">
         <SearchResult
@@ -40,6 +40,7 @@
 
 <style lang="scss">
 section.results {
+  margin: auto;
   margin-top: 25px;
   margin-bottom: 50px;
   display: grid;
@@ -171,11 +172,9 @@ export default {
         );
       await Promise.all([a, b]);
       this.search = result;
-      console.log(this.search);
     },
     keyDown: function (e) {
       // if (e.keyCode != 13) return;
-      console.log(e.target.value);
       clearTimeout(this.searchBouncer);
       this.searchBouncer = setTimeout(this.searchDebounce, 300, e.target.value);
     },
