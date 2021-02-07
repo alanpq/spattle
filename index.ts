@@ -1,12 +1,7 @@
-import sha256 from 'crypto-js/sha256'
-import Base64 from 'crypto-js/enc-base64';
-
 import * as crypto from 'crypto';
 
 import express from 'express';
-import { enc, SHA256 } from 'crypto-js';
 import { AggregationCursor, Collection, Db, MongoClient } from 'mongodb';
-import { allowedNodeEnvironmentFlags } from 'process';
 import { json } from 'body-parser';
 import * as fetch from 'node-fetch';
 import { v4 } from 'uuid';
@@ -21,6 +16,7 @@ const perfObserver = new PerformanceObserver((items) => {
 
 perfObserver.observe({ entryTypes: ["measure"], buffered: true })
 
+// FIXME: better db conn safety
 const uri = "mongodb://127.0.0.1:27017/"
 const client = new MongoClient(uri);
 
@@ -52,7 +48,7 @@ const getTracks = async (ids: [string]) => {
   return await (await authedFetch(`https://api.spotify.com/v1/tracks?ids=${ids.join(",")}`)).json();
 }
 
-
+// TODO: split some of this stuff to seperate modules
 const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", ".", "-", "~"]
 for (const x of Array(26).keys()) {
   chars.push(String.fromCharCode('a'.charCodeAt(0) + x))
@@ -62,7 +58,7 @@ for (const x of Array(26).keys()) {
 
 const genChallenge = () => {
   const buf = crypto.randomBytes(128);
-  const final = new Array(128); // TODO: test perf of using array vs string concat, etc
+  const final = new Array(128); // MINOR: test perf of using array vs string concat, etc
   let i = 0;
   for (const x of buf) {
     // TODO: stop using modulo to reduce (fucks with distribution)
@@ -107,6 +103,8 @@ app.get('/api/challenge', (req, res) => {
 
 const battles: { [token: string]: { a: string, b: string } } = {};
 
+// TODO: prefetch battles to improve serve times
+// TODO: weight probabilities towards less "battled" songs
 app.get('/api/battle', async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   performance.mark("battle-endpoint-start")
@@ -226,7 +224,7 @@ app.options('/api/addtracks', async (req, res) => {
 })
 
 app.post('/api/addtracks', async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.setHeader("Access-Control-Allow-Origin", "*") // TODO: remember if i can get rid of this cross origin stuff
   if (!req.body.tracks) return res.status(403).send();
   const tracks = (await getTracks(req.body.tracks)).tracks;
   let count = 0;
@@ -267,15 +265,15 @@ function exitHandler(options: any, exitCode: any) {
   if (options.exit) process.exit();
 }
 
-//do something when app is closing
+// do something when app is closing
 process.on('exit', exitHandler.bind(null, { cleanup: true }));
 
-//catches ctrl+c event
+// catches ctrl+c event
 process.on('SIGINT', exitHandler.bind(null, { exit: true }));
 
 // catches "kill pid" (for example: nodemon restart)
 process.on('SIGUSR1', exitHandler.bind(null, { exit: true }));
 process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
 
-//catches uncaught exceptions
+// catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
