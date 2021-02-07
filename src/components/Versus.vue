@@ -135,6 +135,7 @@ export default {
   grid-template-rows: $songNameH $artistH $mobileSize 5vh $songNameH $artistH $mobileSize;
   grid-template-areas:
     "TITLEA TITLEA TITLEA"
+    "ARTISTA ARTISTA ARTISTA"
     ". IMGA WINA"
     "VERSUS VERSUS VERSUS"
     "TITLEB TITLEB TITLEB"

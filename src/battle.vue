@@ -148,6 +148,8 @@ main#battle {
 
   article.text {
     position: absolute;
+    left: 0;
+    right: 0;
     top: 100vh;
     @media screen and (min-aspect-ratio: 11/10) {
       position: unset;
