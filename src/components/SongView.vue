@@ -175,11 +175,25 @@ section.song {
     }
     &.extern-link {
       //margin-left: auto;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      $extPad: $pad * 0.5;
+
+      margin-bottom: auto;
+      margin-top: $extPad;
       margin-right: auto;
-      margin-left: $pad;
+      margin-left: $extPad;
+      
       &.song-b {
-        margin-left: auto;
-        margin-right: $pad;
+        @media screen and (min-aspect-ratio: 11/10) {
+            margin-left: auto;
+            margin-right: $extPad;
+        }
+      }
+
+      svg {
+        transform: translate(-10%, -10%) scale(0.7);
       }
     }
     &.play-song {
@@ -192,7 +206,9 @@ section.song {
       padding: $pad;
 
       &.song-b {
-        justify-content: start;
+        @media screen and (min-aspect-ratio: 11/10) {
+          justify-content: start;
+        }
       }
       justify-content: end;
       svg {

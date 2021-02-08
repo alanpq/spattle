@@ -129,7 +129,7 @@ export default {
 <style lang="scss">
 .versus {
   display: grid;
-  $mobileSize: 31vh;
+  $mobileSize: 30vh;
   $artistH: 0.5em;
   $songNameH: 1.5em - $artistH;
   width: 100%;

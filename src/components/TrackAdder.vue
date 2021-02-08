@@ -9,7 +9,7 @@
         songs!
       </span>
     </section>
-    <p>or search a song/album to add:</p>
+    <p>or search a song/album to add to the battlefield:</p>
     <input
       @keydown="keyDown($event)"
       type="text"
