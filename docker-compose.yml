@@ -2,26 +2,34 @@ version: "3.8"
 services:
   spattle:
     build: .
+    links:
+      - 'database:database'
     ports:
       - "8082:3000"
     volumes:
       - .:/spattle
+      - /spattle/node_modules
+    command: sh -c "mkdir -p dist && touch ./dist/index.js && nodemon --delay 500ms --watch dist ./dist/index.js"
     restart: unless-stopped
+  
+  transpiler:
+    build: .
+    volumes:
+      - .:/spattle
+      - /spattle/node_modules
+    command: sh -c "cp index.html dist/index.html && tsc -w"
+
   database:
-    image: mongo:latest
+    image: bitnami/mongodb:latest
     container_name: mongodb
     hostname: mongodb
     env_file:
       - .env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGODB_USERNAME: spattle
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_DATABASE: spattle
     volumes:
-          - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
-          - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
-          - ./.docker/mongodb/data/db/:/data/db/
-          - ./.docker/mongodb/data/log/:/var/log/mongodb/
+      - '.docker/mongodb:/bitnami/mongodb'
     ports:
-      - '27017-27019:27017-27019'
-    command: ["-f", "/etc/mongod.conf"]
+      - '27017:27017'

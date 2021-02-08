@@ -17,7 +17,7 @@ const perfObserver = new PerformanceObserver((items) => {
 perfObserver.observe({ entryTypes: ["measure"], buffered: true })
 
 // FIXME: better db conn safety
-const uri = "mongodb://127.0.0.1:27017/"
+const uri = "mongodb://database:27017/"
 const client = new MongoClient(uri);
 
 const app = express()
