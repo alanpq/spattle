@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Sono:wght@300;400&display=swap');
+
+@font-face {
+  font-family: glue1-spoticon;
+  src: url("https://open.scdn.co/cdn/fonts/spoticon_regular_2.d319d911.woff2")
+      format("woff2"),
+    url("https://open.scdn.co/cdn/fonts/spoticon_regular_2.ff4c6091.woff")
+      format("woff"),
+    url("https://open.scdn.co/cdn/fonts/spoticon_regular_2.127670b5.ttf")
+      format("truetype");
+  font-style: normal;
+  font-weight: 400;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap');
+
+:global(:root) {
+  --bg1: #121212;
+  --bg2: #181818;
+  --bg3: #282828;
+  --bg4: #414141;
+  --bg5: #5f5f5f;
+
+  --fg1: rgb(255, 255, 255);
+  --fg2: rgba(255, 255, 255, 0.712);
+
+  --accent: #1db954;
+  --accentLight: #4eda7f;
+  --accentDark: #4eda7f;
+}
