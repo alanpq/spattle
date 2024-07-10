@@ -2,9 +2,13 @@
 
 > Spotify Battle to determine the best song of all time
 
+![screenshot of spattle main page](./spattle_01.png)
+
+> **NOTE**: This project is discontinued, and only works with NodeJS 14
+
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 npm install
 
